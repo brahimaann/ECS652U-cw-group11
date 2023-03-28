@@ -4,6 +4,7 @@ import ast.visitor.BaseVisitor;
 import java.util.Objects;
 
 class MyContext{
+
 }
 
 public class TypeCheckingVisitor extends BaseVisitor<Symbol, MyContext> {
@@ -12,6 +13,13 @@ public class TypeCheckingVisitor extends BaseVisitor<Symbol, MyContext> {
     public Symbol visit(IsVoidNode node, MyContext data) {
 
         return visit(node.getE1(),data);
+    }
+
+    @Override
+    public Symbol visit(AssignNode node, MyContext data) {
+
+
+        return visit((Tree) node.getExpr(), data);
     }
 
     @Override
@@ -52,7 +60,6 @@ public class TypeCheckingVisitor extends BaseVisitor<Symbol, MyContext> {
         }
         return visit((IntUnopNode) node, data);
     }
-
 
     @Override
     public Symbol visit(PlusNode node, MyContext data) {
@@ -120,6 +127,7 @@ public class TypeCheckingVisitor extends BaseVisitor<Symbol, MyContext> {
 
     @Override
     public Symbol visit(ConstNode node, MyContext data)  {
+        node.getVal();
         return base(node, data);
     }
 
