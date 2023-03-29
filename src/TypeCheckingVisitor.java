@@ -4,6 +4,7 @@ import ast.visitor.BaseVisitor;
 import java.util.Objects;
 
 class MyContext{
+    SymbolTable map = new SymbolTable<Integer>();
 
 }
 
@@ -18,8 +19,7 @@ public class TypeCheckingVisitor extends BaseVisitor<Symbol, MyContext> {
     @Override
     public Symbol visit(AssignNode node, MyContext data) {
 
-
-        return visit((Tree) node.getExpr(), data);
+        return TreeConstants.Int;
     }
 
     @Override
@@ -35,7 +35,7 @@ public class TypeCheckingVisitor extends BaseVisitor<Symbol, MyContext> {
         }
 
         node.setType(TreeConstants.Bool);
-        return visit((BoolBinopNode) node, data);
+        return TreeConstants.Bool;
     }
 
     @Override
@@ -49,7 +49,7 @@ public class TypeCheckingVisitor extends BaseVisitor<Symbol, MyContext> {
         }
 
         node.setType(TreeConstants.Bool);
-        return visit((BoolBinopNode) node, data);
+        return TreeConstants.Bool;
     }
 
     @Override
@@ -58,7 +58,7 @@ public class TypeCheckingVisitor extends BaseVisitor<Symbol, MyContext> {
         if(!Objects.equals(typeE1, TreeConstants.Int)){
             Utilities.semantError().println("error at line "+node.getLineNumber());
         }
-        return visit((IntUnopNode) node, data);
+        return TreeConstants.Int;
     }
 
     @Override
@@ -74,7 +74,7 @@ public class TypeCheckingVisitor extends BaseVisitor<Symbol, MyContext> {
         }
 
             node.setType(TreeConstants.Int);
-        return visit((IntBinopNode) node, data);
+        return TreeConstants.Int;
     }
 
     @Override
@@ -90,7 +90,7 @@ public class TypeCheckingVisitor extends BaseVisitor<Symbol, MyContext> {
         }
 
         node.setType(TreeConstants.Int);
-        return visit((IntBinopNode) node, data);
+        return TreeConstants.Int;
     }
 
     @Override
@@ -106,7 +106,7 @@ public class TypeCheckingVisitor extends BaseVisitor<Symbol, MyContext> {
         }
 
         node.setType(TreeConstants.Int);
-        return visit((IntBinopNode) node, data);
+        return TreeConstants.Int;
     }
 
     @Override
@@ -122,7 +122,7 @@ public class TypeCheckingVisitor extends BaseVisitor<Symbol, MyContext> {
         }
 
         node.setType(TreeConstants.Int);
-        return visit((IntBinopNode) node, data);
+        return TreeConstants.Int;
     }
 
     @Override
@@ -134,19 +134,19 @@ public class TypeCheckingVisitor extends BaseVisitor<Symbol, MyContext> {
     @Override
     public Symbol visit(IntConstNode node, MyContext data)  {
         node.setType(TreeConstants.Int);
-        return visit((ConstNode) node, data);
+        return TreeConstants.Int;
     }
 
     @Override
     public Symbol visit(StringConstNode node, MyContext data)  {
         node.setType(TreeConstants.Str);
-        return visit((ConstNode) node, data);
+        return TreeConstants.Str;
     }
 
     @Override
     public Symbol visit(BoolConstNode node, MyContext data)  {
         node.setType(TreeConstants.Bool);
-        return visit((ConstNode) node, data);
+        return TreeConstants.Bool;
     }
 
 
