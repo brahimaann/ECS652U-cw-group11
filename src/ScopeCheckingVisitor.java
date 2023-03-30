@@ -4,20 +4,18 @@ public class ScopeCheckingVisitor extends BaseVisitor<Object, Object> {
 
     
     public ScopeCheckingVisitor() {
-        ScopeCheckingVisitor<???> Table = new ScopeCheckingVisitor<???>();
-	    ClassTable IG = new ClassTable(new ArrayList<ClassNode>);
+	    ClassTable IG = new ClassTable(new ArrayList<ClassNode>());
         SymbolTable ST = new SymbolTable();	
     }
 
 
 
----------------------------------------
+//---------------------------------------
 
     public R visit(ProgramNode node, D data) {
 		ArrayList<ClassNode> listOfClasses = new ArrayList<ClassNode>();
 
 		for (ClassNode temp : node.getClasses()){ 
-
 			listOfClasses.add(temp);
 		}
 
@@ -25,6 +23,7 @@ public class ScopeCheckingVisitor extends BaseVisitor<Object, Object> {
 		if (!IG.checkInheritanceGraph()) return false;
 		return true;
         //we have now checked for inheritence 
+        
     }
 
     public boolean visit(ClassNode node, D data) {
@@ -35,7 +34,7 @@ public class ScopeCheckingVisitor extends BaseVisitor<Object, Object> {
 
     public R visit(FeatureNode node, D data) {
       
-        return
+        return true;
     }
 
     public R visit(MethodNode node, D data) {
@@ -50,7 +49,7 @@ public class ScopeCheckingVisitor extends BaseVisitor<Object, Object> {
     
     }
 
-    public R visit(AttributeNode node, D data) {
+    public boolean visit(AttributeNode node, D data) {
 
 	
 				 if (Table.lookup(node.Getname())!=null){
@@ -61,16 +60,16 @@ public class ScopeCheckingVisitor extends BaseVisitor<Object, Object> {
 					return false;
 				}
 				Table.insert(F.attribute.name,F.attribute);
+                return true;
 		}
 
-		return true;
-    }
+    
     
 
-    public R visit(FormalNode node, D data) {
+    public boolean visit(FormalNode node, D data) {
         visit(node.getName(), data);
         visit(node.getType_decl(), data);
-        return base(node, data);
+        return true; //return base(node, data);
     }
 
     public R visit(BranchNode node, D data) {
@@ -84,7 +83,7 @@ public class ScopeCheckingVisitor extends BaseVisitor<Object, Object> {
 
     public R visit(AssignNode node, D data) {
         visit(node.getName(), data);
-        return  visit((Tree) node.getExpr(), data);
+        return  visit((Tree) node.getExpr(), data); 
     }
 
     public R visit(StaticDispatchNode node, D data) {
@@ -141,95 +140,94 @@ public class ScopeCheckingVisitor extends BaseVisitor<Object, Object> {
         return base(node, data);
     }
 
-    public R visit(IntBinopNode node, D data) {
-        return visit((BinopNode) node, data);
+    public boolean visit(IntBinopNode node, D data) {
+        return true;
     }
 
-    public R visit(BoolBinopNode node, D data) {
-        return visit((BinopNode) node, data);
+    public boolean visit(BoolBinopNode node, D data) {
+        return true;
     }
 
-    public R visit(IntUnopNode node, D data) {
-        return visit((UnopNode) node, data);
+    public boolean visit(IntUnopNode node, D data) {
+        return true;
     }
 
-    public R visit(BoolUnopNode node, D data) {
-        return visit((UnopNode) node, data);
+    public boolean visit(BoolUnopNode node, D data) {
+        return true;
     }
 
-    public R visit(PlusNode node, D data) {
-        return visit((IntBinopNode) node, data);
+    public boolean visit(PlusNode node, D data) {
+        return true;
     }
 
-    public R visit(SubNode node, D data) {
-        return visit((IntBinopNode) node, data);
+    public boolean visit(SubNode node, D data) {
+        return true;
     }
 
-    public R visit(MulNode node, D data) {
-        return visit((IntBinopNode) node, data);
+    public boolean visit(MulNode node, D data) {
+        return true;
     }
 
-    public R visit(DivideNode node, D data)  {
-        return visit((IntBinopNode) node, data);
+    public boolean visit(DivideNode node, D data)  {
+        return true;
     }
 
-    public R visit(NegNode node, D data)  {
-        return visit((IntUnopNode) node, data);
+    public boolean visit(NegNode node, D data)  {
+        return true;
     }
 
-    public R visit(LTNode node, D data) {
-        return visit((BoolBinopNode) node, data);
+    public boolean visit(LTNode node, D data) {
+        //DO STUFF HERE
+        return true;
     }
 
-    public R visit(EqNode node, D data) {
-        return visit((BoolBinopNode) node, data);
+    public boolean visit(EqNode node, D data) {
+        return true;
     }
 
-    public R visit(LEqNode node, D data) {
-        return visit((BoolBinopNode) node, data);
+    public boolean visit(LEqNode node, D data) {
+        return true;
     }
 
-    public R visit(CompNode node, D data) {
-        return visit((BoolUnopNode) node, data);
+    public boolean visit(CompNode node, D data) {
+        return true;
     }
 
-    public R visit(ConstNode node, D data) {
-        return base(node, data);
+    public boolean visit(ConstNode node, D data) {
+        return true;
     }
 
-    public R visit(IntConstNode node, D data) {
-        return visit((ConstNode) node, data);
+    public boolean visit(IntConstNode node, D data) {
+        return true;
     }
 
-    public R visit(BoolConstNode node, D data) {
-        return visit((ConstNode) node, data);
+    public boolean visit(BoolConstNode node, D data) {
+        return true;
     }
 
-    public R visit(StringConstNode node, D data) {
+    public boolean visit(StringConstNode node, D data) {
 
         // WE CAN IGNORE ALL THIS FOR THE MOST PART
-        return visit((ConstNode) node, data);
+        return true;
     }
 
-    public R visit(NewNode node, D data) {
-        return base(node, data);
+    public boolean visit(NewNode node, D data) {
+        return true;
     }
 
-    public R visit(IsVoidNode node, D data) {
-        return visit((Tree) node.getE1(), data);
+    public boolean visit(IsVoidNode node, D data) {
+        return true;
     }
 
-    public R visit(ObjectNode node, D data) {
-        return visit(node.getName(), data);
+    public boolean visit(ObjectNode node, D data) {
+        //somethign here??
+        return true;
     }
     public R visit(NoExpressionNode node, D data) { return base(node, data); }
 
-
-
-
-
 }
 
+    
 
 
 
@@ -276,129 +274,125 @@ public class ScopeCheckingVisitor extends BaseVisitor<Object, Object> {
 
 
 
-    @Override
-    public boolean visit(ExpressionNode node, D data) {
-        E.visitEcount++;
+
+
+
+    // @Override
+    // public boolean visit(ExpressionNode node, D data) {
+    //     E.visitEcount++;
 		
-		if (Node.getType() instanceof ast.BlockNode){
-            ST.enterScope();
+	// 	if (Node.getType() instanceof ast.BlockNode){
+    //         ST.enterScope();
 
-            return true;
-		}
-		else if (Node.getType instanceof ast.AssignNode){
+    //         return true;
+	// 	}
+	// 	else if (Node.getType instanceof ast.AssignNode){
 
-			ast.AssignNode ag = (ast.AssignNode) node.getType();
-			ast.AssignNode node;
-			node = ST.lookup(ag.name);
+	// 		ast.AssignNode ag = (ast.AssignNode) node.getType();
+	// 		ast.AssignNode node;
+	// 		node = ST.lookup(ag.name);
 
-				if (node == null || node instanceof ast.method){
-                    //THROW ERROR HERE
-					System.out.println("assign operation to an invalid Identifier with name "+ag.name);
-					E.flag = true;
-					return false;
+	// 			if (node == null || node instanceof ast.method){
+    //                 //THROW ERROR HERE
+	// 				System.out.println("assign operation to an invalid Identifier with name "+ag.name);
+	// 				E.flag = true;
+	// 				return false;
 
-				}
-				else{
-                    //VALID AND ADD IT TO OUR TABLE
-					// AST.attr at = (AST.attr) node;
-					// if (getType(E.expr).equals(at.typeid)){
-					// 	Table.insert(ag.name,E.expr);
-					// }else {
-					// 	System.out.println("The type of assign expression doesn't match");
-					// }
-				}
+	// 			}
+	// 			else{
+    //                 //VALID AND ADD IT TO OUR TABLE
+	// 				// AST.attr at = (AST.attr) node;
+	// 				// if (getType(E.expr).equals(at.typeid)){
+	// 				// 	Table.insert(ag.name,E.expr);
+	// 				// }else {
+	// 				// 	System.out.println("The type of assign expression doesn't match");
+	// 				// }
+	// 			}
 
 
-			}
+	// 		}
 
-		}
+	// 	}
 
-		else if (E.expr instanceof AST.dispatch){
-			System.out.println("dispatch expression");
+	// 	else if (E.expr instanceof AST.dispatch){
+	// 		System.out.println("dispatch expression");
 			
-			AST.dispatch dp = (AST.dispatch) E.expr;
-			AST.ASTNode node;
-			if (!E.flag && E.visitEcount<2){
-				node =Table.lookUpClassSpace(dp.name);
-				if (node ==null || node instanceof AST.attr){
-					System.out.println("Flagged");
-					E.flag=true;
-					return false;
-				}
+	// 		AST.dispatch dp = (AST.dispatch) E.expr;
+	// 		AST.ASTNode node;
+	// 		if (!E.flag && E.visitEcount<2){
+	// 			node =Table.lookUpClassSpace(dp.name);
+	// 			if (node ==null || node instanceof AST.attr){
+	// 				System.out.println("Flagged");
+	// 				E.flag=true;
+	// 				return false;
+	// 			}
 
-				else {
-					AST.method m = (AST.method) node;
-					if (m.formals.size() != dp.actuals.size()){
-						System.out.println("The number of parameters passes doesn't match");
-						return false;
-					}
-					for (int i=0;i<m.formals.size();i++){
-						if (!m.formals.get(i).typeid.equals(getType(dp.actuals.get(i)))){
-							System.out.println("The parameters type don't match with the signature");
-							return false;
-						}
-					}
-					// Check condition of caller
+	// 			else {
+	// 				AST.method m = (AST.method) node;
+	// 				if (m.formals.size() != dp.actuals.size()){
+	// 					System.out.println("The number of parameters passes doesn't match");
+	// 					return false;
+	// 				}
+	// 				for (int i=0;i<m.formals.size();i++){
+	// 					if (!m.formals.get(i).typeid.equals(getType(dp.actuals.get(i)))){
+	// 						System.out.println("The parameters type don't match with the signature");
+	// 						return false;
+	// 					}
+	// 				}
+	// 				// Check condition of caller
 
 					
-				}
+	// 			}
 
-			}
-			else if (E.flag){
-				// Check the inheritance graph;
-			}
+	// 		}
+	// 		else if (E.flag){
+	// 			// Check the inheritance graph;
+	// 		}
 			
 			
-		}
+	// 	}
 
-		else if (E.expr instanceof AST.static_dispatch){
-			System.out.println("static d expression");
+	// 	else if (E.expr instanceof AST.static_dispatch){
+	// 		System.out.println("static d expression");
 
-		}
+	// 	}
 
-		else if (E.expr instanceof AST.cond){
-			System.out.println("if expression");
-			getType(E.expr);
-			return true;
-		}
-		else if (E.expr instanceof AST.loop){
-			System.out.println("loop expression");
-			getType(E.expr);
-			return true;
-		}
-		else if (E.expr instanceof AST.let){
-			System.out.println("let expression");
+	// 	else if (E.expr instanceof AST.cond){
+	// 		System.out.println("if expression");
+	// 		getType(E.expr);
+	// 		return true;
+	// 	}
+	// 	else if (E.expr instanceof AST.loop){
+	// 		System.out.println("loop expression");
+	// 		getType(E.expr);
+	// 		return true;
+	// 	}
+	// 	else if (E.expr instanceof AST.let){
+	// 		System.out.println("let expression");
 
-		}
+	// 	}
 
-		else if (E.expr instanceof AST.typcase){
-			System.out.println("case expression");
+	// 	else if (E.expr instanceof AST.typcase){
+	// 		System.out.println("case expression");
 
-		}
-		else if (E.expr instanceof AST.new_){
-			System.out.println("New expression");
-			AST.new_ newExp = (AST.new_) E.expr;
-			if (!E.flag && E.visitEcount<2){
+	// 	}
+	// 	else if (E.expr instanceof AST.new_){
+	// 		System.out.println("New expression");
+	// 		AST.new_ newExp = (AST.new_) E.expr;
+	// 		if (!E.flag && E.visitEcount<2){
 			
-				if ((newExp.typeid.equals("Int") || newExp.typeid.equals("Bool") || newExp.typeid.equals("String"))){
-					return true;
+	// 			if ((newExp.typeid.equals("Int") || newExp.typeid.equals("Bool") || newExp.typeid.equals("String"))){
+	// 				return true;
 
-				}
-				else{
-					System.out.println("Flagged");
-					E.flag=true;
-					return false;
-				}
+	// 			}
+	// 			else{
+	// 				System.out.println("Flagged");
+	// 				E.flag=true;
+	// 				return false;
+	// 			}
 
-			}
-		}
+	// 		}
+	// 	}
 
-		return true;
+	// 	return true;
 
-
-    //    return  visit((Tree) node, data);
-
-    }
-
-
-}

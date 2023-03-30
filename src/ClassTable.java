@@ -247,25 +247,67 @@ class ClassTable {
 
     public ClassTable(List<ClassNode> cls) {
         
+class InheritanceGraph{
+	ArrayList<ClassNode> listOfClasses;
+	public void setGraph(ArrayList<ClassNode> listOfClasses){
+		this.listOfClasses = listOfClasses;
+	}
+	// Function for checking if the inheritance graph is correct or not if not then return false else true
 
 
 
+	public boolean checkInheritanceGraph(){
 
-        semantErrors = 0;
-	errorStream = System.err;
-	inheritanceGraph = new Graph();
-	classNameMapper = new HashMap<String, class_c>();
+		for(int i=0;i<listOfClasses.size();i++){
+			ClassNode temp = listOfClasses.get(i);
+			if (temp.getParent().equals("Object")) {
+				temp.parent=null;
+				continue;	
+			}
+			boolean cont = false;
+			for (int j=0;j<listOfClasses.size();j++){
+				if (temp.getParent().equals(listOfClasses.get(j).getName())){
+					System.out.println(temp.self.name + " -> " + listOfClasses.get(j).self.name );
+					temp.parent = listOfClasses.get(j);
+					cont =true;
+				}
+			}
+			if (!cont){
+                                //THROW ERROR
+				System.out.println("No matching parentclass found for class " + temp.self.name);
+				return false;
+			}
+		}	
 
-	inheritanceGraph.addEdge(TreeConstants.Object_.toString(), TreeConstants.Int.toString(), 1);
-	inheritanceGraph.addEdge(TreeConstants.Object_.toString(), TreeConstants.Str.toString(), 1);
-	inheritanceGraph.addEdge(TreeConstants.Object_.toString(), TreeConstants.Bool.toString(), 1);
-	inheritanceGraph.addEdge(TreeConstants.Object_.toString(), TreeConstants.IO.toString(), 1);
-	objectEnv = new SymbolTable();
-	methodEnv = new SymbolTable();
-	objectEnv.enterScope();
-	methodEnv.enterScope();
-	addBasicClassesToClassNameMapperAndAddToEnvironments();
+		for (ClassNode cn : listOfClasses){
+			boolean isCyclic = checkCycles(cn);
+			if (isCyclic) {
+                                //throw error
+				System.out.println("The inheritance graph contains cycles");
+				return false;
+			}
+		}
 
+		return true;
+
+	}
+// Method to check if the inheritance graph contains cycles returns true if contains else false
+	public boolean checkCycles(ClassNode classNode){
+
+		if (classNode.getParent().equals("Object")){
+			return false;
+		}
+		else if (classNode.isVisited == 1){
+			return true;
+		}
+		else {
+			classNode.isVisited=1;
+			boolean check = checkCycles(classNode.parent);
+			classNode.isVisited=0;
+			return check;
+		}
+	}
+}
     }
 
     
