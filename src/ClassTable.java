@@ -11,14 +11,6 @@ import java.util.List;
  */
 class ClassTable {
 
-    private int semantErrors;
-    private PrintStream errorStream;
-    public Graph inheritanceGraph;
-    public Map<String, class_c> classNameMapper;
-    public SymbolTable objectEnv;
-    public SymbolTable methodEnv;
-
-
     /**
      * Creates data structures representing basic Cool classes (Object,
      * IO, Int, Bool, String).  Please note: as is this method does not
@@ -208,55 +200,23 @@ class ClassTable {
 
 
 
-
-
-
-
-        for(String className : classNameMapper.keySet()) {
-    		class_c c1 = classNameMapper.get(className);
-		
-	    Map<AbstractSymbol, List<AbstractSymbol>> methodArgMap = new HashMap<AbstractSymbol, List<AbstractSymbol>>();
-	    Map<AbstractSymbol, AbstractSymbol> attrTypeMap = new HashMap<AbstractSymbol, AbstractSymbol>(); 
-	    for(Enumeration e2 = c1.getFeatures().getElements(); e2.hasMoreElements();){
-		Feature f = (Feature) e2.nextElement();
-		if(f instanceof attr){
-			attr a = (attr) f;
-			attrTypeMap.put(a.name, a.type_decl);	
-		
-		} else if (f instanceof method){
-			method m = (method) f;
-			List<AbstractSymbol> typeList = new ArrayList<AbstractSymbol>();
-			for(Enumeration e3 = m.formals.getElements(); e3.hasMoreElements();){
-				formalc fo = (formalc) e3.nextElement();
-				typeList.add(fo.type_decl);
-			}
-			typeList.add(m.return_type);
-			methodArgMap.put(m.name, typeList);
-			
-		} else {
-			System.out.println("Error should never reach here!");
-		}
-	    }
-	    methodEnv.addId(c1.name, methodArgMap);
-	    objectEnv.addId(c1.name, attrTypeMap);
-    		
-	}
-
-
     }
 
     public ClassTable(List<ClassNode> cls) {
         
 class InheritanceGraph{
 	ArrayList<ClassNode> listOfClasses;
+        Map<Symbol, Int> VisitChecker;
 	public void setGraph(ArrayList<ClassNode> listOfClasses){
 		this.listOfClasses = listOfClasses;
+                installBasicClasses();
+                VisitChecker  = new HashMap<ClassNode, Int>();
 	}
 	// Function for checking if the inheritance graph is correct or not if not then return false else true
 
 
-
 	public boolean checkInheritanceGraph(){
+                
 
 		for(int i=0;i<listOfClasses.size();i++){
 			ClassNode temp = listOfClasses.get(i);
@@ -280,7 +240,7 @@ class InheritanceGraph{
 		}	
 
 		for (ClassNode cn : listOfClasses){
-			boolean isCyclic = checkCycles(cn);
+			boolean isCyclic = checkCycles(cn,  new HashMap<ClassNode, Int>());
 			if (isCyclic) {
                                 //throw error
 				System.out.println("The inheritance graph contains cycles");
@@ -292,18 +252,18 @@ class InheritanceGraph{
 
 	}
 // Method to check if the inheritance graph contains cycles returns true if contains else false
-	public boolean checkCycles(ClassNode classNode){
+	public boolean checkCycles(ClassNode classNode,  HashMap<ClassNode, Int> VisitChecker){
 
 		if (classNode.getParent().equals("Object")){
 			return false;
 		}
-		else if (classNode.isVisited == 1){
+		else if (VisitChecker.getOrDefault(classNode.getName(), 0) == 1){
 			return true;
 		}
 		else {
-			classNode.isVisited=1;
-			boolean check = checkCycles(classNode.parent);
-			classNode.isVisited=0;
+                        VisitChecker.put(classNode, 1);
+			boolean check = checkCycles(classNode.parent, VisitChecker);
+			VisitChecker.put(classNode, 0);
 			return check;
 		}
 	}
