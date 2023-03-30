@@ -10,6 +10,15 @@ import java.util.List;
  * here to provide a container for the supplied methods.
  */
 class ClassTable {
+
+    private int semantErrors;
+    private PrintStream errorStream;
+    public Graph inheritanceGraph;
+    public Map<String, class_c> classNameMapper;
+    public SymbolTable objectEnv;
+    public SymbolTable methodEnv;
+
+
     /**
      * Creates data structures representing basic Cool classes (Object,
      * IO, Int, Bool, String).  Please note: as is this method does not
@@ -189,11 +198,75 @@ class ClassTable {
 	/* Do somethind with Object_class, IO_class, Int_class,
            Bool_class, and Str_class here */
 
+
+	classNameMapper.put(TreeConstants.Int.toString(), new ArrayList<ClassNode>.add(Int_class) );
+	classNameMapper.put(TreeConstants.Object_.toString(), new ArrayList<ClassNode>.add(Object_class));
+	classNameMapper.put(TreeConstants.IO.toString(), IO_class);
+	classNameMapper.put(TreeConstants.Str.toString(), Str_class);
+	classNameMapper.put(TreeConstants.Bool.toString(), Bool_class);
+
+
+
+
+
+
+
+
+        for(String className : classNameMapper.keySet()) {
+    		class_c c1 = classNameMapper.get(className);
+		
+	    Map<AbstractSymbol, List<AbstractSymbol>> methodArgMap = new HashMap<AbstractSymbol, List<AbstractSymbol>>();
+	    Map<AbstractSymbol, AbstractSymbol> attrTypeMap = new HashMap<AbstractSymbol, AbstractSymbol>(); 
+	    for(Enumeration e2 = c1.getFeatures().getElements(); e2.hasMoreElements();){
+		Feature f = (Feature) e2.nextElement();
+		if(f instanceof attr){
+			attr a = (attr) f;
+			attrTypeMap.put(a.name, a.type_decl);	
+		
+		} else if (f instanceof method){
+			method m = (method) f;
+			List<AbstractSymbol> typeList = new ArrayList<AbstractSymbol>();
+			for(Enumeration e3 = m.formals.getElements(); e3.hasMoreElements();){
+				formalc fo = (formalc) e3.nextElement();
+				typeList.add(fo.type_decl);
+			}
+			typeList.add(m.return_type);
+			methodArgMap.put(m.name, typeList);
+			
+		} else {
+			System.out.println("Error should never reach here!");
+		}
+	    }
+	    methodEnv.addId(c1.name, methodArgMap);
+	    objectEnv.addId(c1.name, attrTypeMap);
+    		
+	}
+
+
     }
 
     public ClassTable(List<ClassNode> cls) {
-    	/* fill this in */
+        
+
+
+
+
+        semantErrors = 0;
+	errorStream = System.err;
+	inheritanceGraph = new Graph();
+	classNameMapper = new HashMap<String, class_c>();
+
+	inheritanceGraph.addEdge(TreeConstants.Object_.toString(), TreeConstants.Int.toString(), 1);
+	inheritanceGraph.addEdge(TreeConstants.Object_.toString(), TreeConstants.Str.toString(), 1);
+	inheritanceGraph.addEdge(TreeConstants.Object_.toString(), TreeConstants.Bool.toString(), 1);
+	inheritanceGraph.addEdge(TreeConstants.Object_.toString(), TreeConstants.IO.toString(), 1);
+	objectEnv = new SymbolTable();
+	methodEnv = new SymbolTable();
+	objectEnv.enterScope();
+	methodEnv.enterScope();
+	addBasicClassesToClassNameMapperAndAddToEnvironments();
+
     }
-}
 
     
+}

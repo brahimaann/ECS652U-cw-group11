@@ -38,6 +38,8 @@ public class BaseVisitor<R,D> implements TreeVisitor<R,D> {
         return base(node, data);
     }
 
+    ----------------------------
+
     public R visit(ProgramNode node, D data) {
         return visit(node.getClasses(), data);
     }

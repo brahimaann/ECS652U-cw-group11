@@ -10,10 +10,16 @@ public class TypeCheckingVisitor extends BaseVisitor<Symbol, MyContext> {
 
     @Override
     public Symbol visit(IsVoidNode node, MyContext data) {
+        Symbol typeE1 = visit(node.getE1(),data);
+        if(!Objects.equals(typeE1, null)){
+            Utilities.semantError().println("error at line "+node.getLineNumber());
+        }
 
+        node.setType(TreeConstants.No_class);
         return visit(node.getE1(),data);
     }
 
+    
     @Override
     public Symbol visit(LTNode node, MyContext data) {
 
@@ -56,11 +62,12 @@ public class TypeCheckingVisitor extends BaseVisitor<Symbol, MyContext> {
 
     @Override
     public Symbol visit(PlusNode node, MyContext data) {
-
+6
         Symbol typeE1 = visit(node.getE1(),data);
         if(!Objects.equals(typeE1, TreeConstants.Int)){
             Utilities.semantError().println("error at line "+node.getLineNumber());
         }
+        //5 + 2
         Symbol typeE2 = visit(node.getE2(),data);
         if(!Objects.equals(typeE2, TreeConstants.Int)){
             Utilities.semantError().println("error at line "+node.getLineNumber());
@@ -120,6 +127,18 @@ public class TypeCheckingVisitor extends BaseVisitor<Symbol, MyContext> {
 
     @Override
     public Symbol visit(ConstNode node, MyContext data)  {
+
+        Symbol typeE1 = visit(node.getE1(),data);
+        if(!Objects.equals(typeE1, TreeConstants.ConstNode)){
+            Utilities.semantError().println("error at line "+node.getLineNumber());
+        }
+        Symbol typeE2 = visit(node.getE2(),data);
+        if(!Objects.equals(typeE2, TreeConstants.ConstNode)){
+            Utilities.semantError().println("error at line "+node.getLineNumber());
+        }
+
+        node.setType(TreeConstants.Int);
+        return visit((IntBinopNode) node, data);
         return base(node, data);
     }
 
@@ -141,5 +160,10 @@ public class TypeCheckingVisitor extends BaseVisitor<Symbol, MyContext> {
         return visit((ConstNode) node, data);
     }
 
+    @Override
+    public Symbol visit(LetNode node, MyContext data) {
+        node.setType(TreeConstants.Let);
+        return visit(node, data);
+    }
 
 }
