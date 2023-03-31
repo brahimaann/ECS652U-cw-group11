@@ -2,6 +2,8 @@ import ast.*;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.List;
+import java.util.HashMap;
 
 
 /**
@@ -10,6 +12,9 @@ import java.util.List;
  * here to provide a container for the supplied methods.
  */
 class ClassTable {
+        List<ClassNode> listOfClasses;
+        HashMap<Symbol,Integer> VisitChecker;
+
     /**
      * Creates data structures representing basic Cool classes (Object,
      * IO, Int, Bool, String).  Please note: as is this method does not
@@ -189,11 +194,109 @@ class ClassTable {
 	/* Do somethind with Object_class, IO_class, Int_class,
            Bool_class, and Str_class here */
 
+
+	listOfClasses.add(Object_class);
+	listOfClasses.add(IO_class);
+	listOfClasses.add(Int_class);
+	listOfClasses.add(Bool_class);
+	listOfClasses.add(Str_class);
+
+
+
+
     }
 
     public ClassTable(List<ClassNode> cls) {
-    	/* fill this in */
+
+       		listOfClasses = cls;
+                installBasicClasses();
+                VisitChecker  = new HashMap<Symbol, Integer>(); 
+   
+
     }
-}
+
+    public boolean checkInheritanceGraph(){
+                
+                for(int i=0;i<listOfClasses.size();i++){
+                        ClassNode t = listOfClasses.get(i);
+                        System.out.println(t.getName());
+                }
+
+		for(int i=0;i<listOfClasses.size();i++){
+			ClassNode temp = listOfClasses.get(i);
+			if (temp.getParent().equals("Object_") || temp.getParent().equals("_no_class") ) {
+				continue;	
+			}
+			boolean cont = false;
+			for (int j=0;j<listOfClasses.size();j++){
+                                System.out.println(temp.getParent().getName());
+				if (temp.getParent().equals(listOfClasses.get(j).getName()) && ((!temp.getParent().equals("Int"))))                                    
+                                {
+					cont =true;
+				}
+			}
+			if (!cont){
+                                //THROW ERROR
+			
+                                Utilities.semantError().println("No matching valid parentclass found for class ");
+				return false;
+			}
+		}	
+
+		for (ClassNode cn : listOfClasses){
+			boolean isCyclic = checkCycles(cn.getName());
+			if (isCyclic) {
+                                //throw error
+				System.out.println("The inheritance graph contains cycles");
+				return true;
+			}
+		}
+
+		return false;
+
+	}
+
+
+
+        public ClassNode getClassNode(Symbol x ) {
+                ClassNode out;
+                for (ClassNode temp : listOfClasses) {
+                        if(temp.getName().equals(x)) {
+                                return temp;
+                        }
+                }
+
+                return null;
+        }
+
+
+
+        //Loop through and find starting node
+        public boolean checkCycles(Symbol classNode)
+        {       
+                
+                ClassNode temp;
+                Symbol Parent;
+
+                temp = getClassNode(classNode);
+                Parent = temp.getParent();
+
+                if(Parent.getName().equals("Object")) {
+                return false;
+                }
+                
+                if(VisitChecker.getOrDefault(Parent.getName(), 0) == 1) {
+                return true;
+
+                } else {
+                        VisitChecker.put(Parent, 1);
+                        boolean check = checkCycles(Parent); 
+                        VisitChecker.put(Parent, 0);
+                        return check;
+                }
+
+
+        }
 
     
+}
