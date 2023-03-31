@@ -1,398 +1,268 @@
 import ast.visitor.BaseVisitor;
+import ast.*;
+import ast.visitor.BaseVisitor;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.ArrayList;
 
-public class ScopeCheckingVisitor extends BaseVisitor<Object, Object> {
 
+public class ScopeCheckingVisitor extends BaseVisitor<Symbol, MyContext> {
+    	ClassTable IG;
+        SymbolTable ST;	
+        boolean flag = false;
     
     public ScopeCheckingVisitor() {
-	    ClassTable IG = new ClassTable(new ArrayList<ClassNode>());
-        SymbolTable ST = new SymbolTable();	
+	    IG = new ClassTable(new ArrayList<ClassNode>());
+        ST = new SymbolTable();	
     }
 
 
 
-//---------------------------------------
+//     attribute definitions; --
+// • formal parameters of methods; -- 
+// • let expressions;
+// • branches of case statements.
 
-    public R visit(ProgramNode node, D data) {
+
+    @Override
+    public Symbol visit(ProgramNode node, MyContext data) {
 		ArrayList<ClassNode> listOfClasses = new ArrayList<ClassNode>();
-
 		for (ClassNode temp : node.getClasses()){ 
 			listOfClasses.add(temp);
 		}
+        IG = new ClassTable(listOfClasses);
+		if (IG.checkInheritanceGraph()) {
+        Utilities.semantError().println("error at line "+node.getLineNumber());
+        } 
 
-		IG.setGraph(listOfClasses);
-		if (!IG.checkInheritanceGraph()) return false;
-		return true;
-        //we have now checked for inheritence 
-        
+
+	    return visit(node.getClasses(), data);
+
     }
 
-    public boolean visit(ClassNode node, D data) {
+   @Override
+    public Symbol visit(ClassNode node, MyContext data) {
         //Do nothing we checked already
 
-        return true;       
+        // return node.getFeatures();   
+        return null;  
     }
-
-    public R visit(FeatureNode node, D data) {
+    @Override
+    public Symbol visit(FeatureNode node, MyContext data) {
       
-        return true;
+          return TreeConstants.Bool;
     }
-
-    public R visit(MethodNode node, D data) {
-        //Check table, if its not empty then its not valid 
-        if(Table.lookup(node.getName()) != null) {
-            return false;
-        } 
-        else {
-        Table.insert(F.attribute.name,F.attribute);
-        return base(node, data);
+    @Override
+    public Symbol visit(MethodNode node, MyContext data) {
+        ST.enterScope();
+        if(ST.lookup(node.getName()) != null) {
+        Utilities.semantError().println("error at line "+node.getLineNumber());
         }
+        ST.addId(node.getName(), node);
+        visit(node.getName(),data);
+        visit(node.getFormals(), data);
+
+        ST.exitScope();
+        return base(node, data);
     
     }
+    @Override
+    public Symbol visit(AttributeNode node, MyContext data) {
 
-    public boolean visit(AttributeNode node, D data) {
+        //SC.enterScope();
+        if(ST.lookup(node.getName()) != null) {
+        Utilities.semantError().println("error at line "+node.getLineNumber());
+        }
+        ST.addId(node.getName(), node);
 
-	
-				 if (Table.lookup(node.Getname())!=null){
-					return false;
-				}
-				if (!(F.attribute.value instanceof AST.no_expr) && !getType(F.attribute.value).equals(F.attribute.typeid)){
-					System.out.println("Type of expression doesn't match typeid");
-					return false;
-				}
-				Table.insert(F.attribute.name,F.attribute);
-                return true;
+       return base(node, data);
 		}
 
     
     
-
-    public boolean visit(FormalNode node, D data) {
-        visit(node.getName(), data);
-        visit(node.getType_decl(), data);
-        return true; //return base(node, data);
-    }
-
-    public R visit(BranchNode node, D data) {
-        visit(node.getName(), data);
-        visit(node.getType_decl(), data);
-        return visit((Tree) node.getExpr(), data);
-    }
-    public R visit(ExpressionNode node, D data) {
-        return  visit((Tree) node, data);
-    }
-
-    public R visit(AssignNode node, D data) {
-        visit(node.getName(), data);
-        return  visit((Tree) node.getExpr(), data); 
-    }
-
-    public R visit(StaticDispatchNode node, D data) {
-        visit((Tree) node.getExpr(), data);
-        visit(node.getActuals(), data);
+    @Override
+    public Symbol visit(FormalNode node, MyContext data) {
+        if(ST.lookup(node.getName()) != null) {
+            Utilities.semantError().println("error at line "+node.getLineNumber());
+        }
         return base(node, data);
     }
 
-    public R visit(DispatchNode node, D data) {
-        visit((Tree) node.getExpr(), data);
-        visit(node.getActuals(), data);
-        return base(node, data);
+    @Override
+    public Symbol visit(BranchNode node, MyContext data) {
+        if(ST.lookup(node.getName()) != null) {
+            Utilities.semantError().println("error at line "+node.getLineNumber());
+        }
+
+        return null;
+    }
+    public Symbol visit(ExpressionNode node, MyContext data) {
+        return  null;
+    }
+    @Override
+    public Symbol visit(AssignNode node, MyContext data) {
+        return  null; 
     }
 
-    public R visit(CondNode node, D data) {
-        visit((Tree) node.getCond(), data);
-        visit((Tree) node.getThenExpr(), data);
-        visit((Tree) node.getElseExpr(), data);
-        return base(node, data);
+    @Override
+    public Symbol visit(StaticDispatchNode node, MyContext data) {
+
+        return null;
     }
 
-    public R visit(LoopNode node, D data) {
-        visit((Tree) node.getCond(), data);
-        visit((Tree) node.getBody(), data);
-        return base(node, data);
+    @Override
+    public Symbol visit(DispatchNode node, MyContext data) {
+
+        return null;
     }
 
+    @Override
+    public Symbol visit(CondNode node, MyContext data) {
 
-    public R visit(CaseNode node, D data) {
-        visit((Tree)node.getExpr(), data);
-        visit(node.getCases(), data);
-        return base(node, data);
+        return null;
     }
 
-    public R visit(BlockNode node, D data) {
-        return visit(node.getExprs(), data);
+    @Override
+    public Symbol visit(LoopNode node, MyContext data) {
+
+        return null;
     }
 
-    public R visit(LetNode node, D data) {
-        //CHeck the name and see if its alredy used, if use throw error
+    @Override
+    public Symbol visit(CaseNode node, MyContext data) {
 
-        //If not used we got in scope and just return true
-        return base(node, data);
+        // if(ST.lookup(node.getName()) != null) {
+        // Utilities.semantError().println("error at line "+node.getLineNumber());
+        // }
+        // ST.lookup(node.getName(), node);
+        return null;
+    }
+    @Override
+    public Symbol visit(BlockNode node, MyContext data) {
+        return null;
     }
 
-    public R visit(BinopNode node, D data) {
-        visit((Tree) node.getE1(), data);
-        visit((Tree) node.getE2(), data);
-        return base(node, data);
+    @Override
+    public Symbol visit(LetNode node, MyContext data) {
+
+
+        ST.enterScope();
+        if(ST.lookup(node.getIdentifier()) != null) {
+        Utilities.semantError().println("error at line "+node.getLineNumber());
+        }
+        ST.addId(node.getIdentifier(), node);
+        return null;
     }
-
-    public R visit(UnopNode node, D data) {
-        visit((Tree) node.getE1(), data);
-        return base(node, data);
-    }
-
-    public boolean visit(IntBinopNode node, D data) {
-        return true;
-    }
-
-    public boolean visit(BoolBinopNode node, D data) {
-        return true;
-    }
-
-    public boolean visit(IntUnopNode node, D data) {
-        return true;
-    }
-
-    public boolean visit(BoolUnopNode node, D data) {
-        return true;
-    }
-
-    public boolean visit(PlusNode node, D data) {
-        return true;
-    }
-
-    public boolean visit(SubNode node, D data) {
-        return true;
-    }
-
-    public boolean visit(MulNode node, D data) {
-        return true;
-    }
-
-    public boolean visit(DivideNode node, D data)  {
-        return true;
-    }
-
-    public boolean visit(NegNode node, D data)  {
-        return true;
-    }
-
-    public boolean visit(LTNode node, D data) {
-        //DO STUFF HERE
-        return true;
-    }
-
-    public boolean visit(EqNode node, D data) {
-        return true;
-    }
-
-    public boolean visit(LEqNode node, D data) {
-        return true;
-    }
-
-    public boolean visit(CompNode node, D data) {
-        return true;
-    }
-
-    public boolean visit(ConstNode node, D data) {
-        return true;
-    }
-
-    public boolean visit(IntConstNode node, D data) {
-        return true;
-    }
-
-    public boolean visit(BoolConstNode node, D data) {
-        return true;
-    }
-
-    public boolean visit(StringConstNode node, D data) {
-
-        // WE CAN IGNORE ALL THIS FOR THE MOST PART
-        return true;
-    }
-
-    public boolean visit(NewNode node, D data) {
-        return true;
-    }
-
-    public boolean visit(IsVoidNode node, D data) {
-        return true;
-    }
-
-    public boolean visit(ObjectNode node, D data) {
-        //somethign here??
-        return true;
-    }
-    public R visit(NoExpressionNode node, D data) { return base(node, data); }
-
-}
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     // @Override
-    // public boolean visit(ExpressionNode node, D data) {
-    //     E.visitEcount++;
-		
-	// 	if (Node.getType() instanceof ast.BlockNode){
-    //         ST.enterScope();
+    // public Symbol visit(BinopNode node, MyContext data) {
+    //     return null;
+    // }
 
-    //         return true;
-	// 	}
-	// 	else if (Node.getType instanceof ast.AssignNode){
+    // @Override
+    // public Symbol visit(UnopNode node, MyContext data) {
 
-	// 		ast.AssignNode ag = (ast.AssignNode) node.getType();
-	// 		ast.AssignNode node;
-	// 		node = ST.lookup(ag.name);
+    //     return null;
+    // }
 
-	// 			if (node == null || node instanceof ast.method){
-    //                 //THROW ERROR HERE
-	// 				System.out.println("assign operation to an invalid Identifier with name "+ag.name);
-	// 				E.flag = true;
-	// 				return false;
+    // @Override
+    // public Symbol visit(IntBinopNode node, MyContext data) {
+    //     return null;
+    // }
 
-	// 			}
-	// 			else{
-    //                 //VALID AND ADD IT TO OUR TABLE
-	// 				// AST.attr at = (AST.attr) node;
-	// 				// if (getType(E.expr).equals(at.typeid)){
-	// 				// 	Table.insert(ag.name,E.expr);
-	// 				// }else {
-	// 				// 	System.out.println("The type of assign expression doesn't match");
-	// 				// }
-	// 			}
+    // public Symbol visit(BoolBinopNode node, MyContext data) {
+    //     return null;
+    // }
 
+    // @Override
+    // public Symbol visit(IntUnopNode node, MyContext data) {
+    //     return null;
+    // }
 
-	// 		}
+    // @Override
+    // public Symbol visit(BoolUnopNode node, MyContext data) {
+    //     return null;
+    // }
 
-	// 	}
+    // @Override
+    // public Symbol visit(PlusNode node, MyContext data) {
+    //     return null;
+    // }
 
-	// 	else if (E.expr instanceof AST.dispatch){
-	// 		System.out.println("dispatch expression");
-			
-	// 		AST.dispatch dp = (AST.dispatch) E.expr;
-	// 		AST.ASTNode node;
-	// 		if (!E.flag && E.visitEcount<2){
-	// 			node =Table.lookUpClassSpace(dp.name);
-	// 			if (node ==null || node instanceof AST.attr){
-	// 				System.out.println("Flagged");
-	// 				E.flag=true;
-	// 				return false;
-	// 			}
+    // @Override
+    // public Symbol visit(SubNode node, MyContext data) {
+    //     return null;
+    // }
 
-	// 			else {
-	// 				AST.method m = (AST.method) node;
-	// 				if (m.formals.size() != dp.actuals.size()){
-	// 					System.out.println("The number of parameters passes doesn't match");
-	// 					return false;
-	// 				}
-	// 				for (int i=0;i<m.formals.size();i++){
-	// 					if (!m.formals.get(i).typeid.equals(getType(dp.actuals.get(i)))){
-	// 						System.out.println("The parameters type don't match with the signature");
-	// 						return false;
-	// 					}
-	// 				}
-	// 				// Check condition of caller
+    // @Override
+    // public Symbol visit(MulNode node, MyContext data) {
+    //     return null;
+    // }
 
-					
-	// 			}
+    // @Override
+    // public Symbol visit(DivideNode node, MyContext data)  {
+    //     return null;
+    // }
 
-	// 		}
-	// 		else if (E.flag){
-	// 			// Check the inheritance graph;
-	// 		}
-			
-			
-	// 	}
+    // @Override
+    // public Symbol visit(NegNode node, MyContext data)  {
+    //     return null;
+    // }
 
-	// 	else if (E.expr instanceof AST.static_dispatch){
-	// 		System.out.println("static d expression");
+    // @Override
+    // public Symbol visit(LTNode node, MyContext data) {
+    //     //DO STUFF HERE
+    //     return null;
+    // }
 
-	// 	}
+    // @Override
+    // public Symbol visit(EqNode node, MyContext data) {
+    //     return null;
+    // }
 
-	// 	else if (E.expr instanceof AST.cond){
-	// 		System.out.println("if expression");
-	// 		getType(E.expr);
-	// 		return true;
-	// 	}
-	// 	else if (E.expr instanceof AST.loop){
-	// 		System.out.println("loop expression");
-	// 		getType(E.expr);
-	// 		return true;
-	// 	}
-	// 	else if (E.expr instanceof AST.let){
-	// 		System.out.println("let expression");
+    // @Override
+    // public Symbol visit(LEqNode node, MyContext data) {
+    //     return null;
+    // }
 
-	// 	}
+    // @Override
+    // public Symbol visit(CompNode node, MyContext data) {
+    //     return null;
+    // }
 
-	// 	else if (E.expr instanceof AST.typcase){
-	// 		System.out.println("case expression");
+    // @Override
+    // public Symbol visit(ConstNode node, MyContext data) {
+    //     return null;
+    // }
 
-	// 	}
-	// 	else if (E.expr instanceof AST.new_){
-	// 		System.out.println("New expression");
-	// 		AST.new_ newExp = (AST.new_) E.expr;
-	// 		if (!E.flag && E.visitEcount<2){
-			
-	// 			if ((newExp.typeid.equals("Int") || newExp.typeid.equals("Bool") || newExp.typeid.equals("String"))){
-	// 				return true;
+    // @Override
+    // public Symbol visit(IntConstNode node, MyContext data) {
+    //     return null;
+    // }
+    // @Override
+    // public Symbol visit(BoolConstNode node, MyContext data) {
+    //     return null;
+    // }
+    // @Override
+    // public Symbol visit(StringConstNode node, MyContext data) {
 
-	// 			}
-	// 			else{
-	// 				System.out.println("Flagged");
-	// 				E.flag=true;
-	// 				return false;
-	// 			}
+    //     // WE CAN IGNORE ALL THIS FOR THE MOST PART
+    //     return null;
+    // }
+    // @Override
+    // public Symbol visit(NewNode node, MyContext data) {
+    //     return null;
+    // }
+    // @Override
+    // public Symbol visit(IsVoidNode node, MyContext data) {
+    //     return null;
+    // }
+    // @Override
+    // public Symbol visit(ObjectNode node, MyContext data) {
+    //     //somethign here??
+    //     return null;
+    // }
+    // // public Symbol visit(NoExpressionNode node, MyContext data) { return base(node, data); }
 
-	// 		}
-	// 	}
-
-	// 	return true;
-
+}   
