@@ -206,6 +206,36 @@ public class CgenEmit  {
             s.println();
         }
     }
+    protected void codeDispatchTable(CgenEnv env) {
+        Symbol className = env.getClassname();
+        emitDispTableRef(className);
+        s.print(CgenConstants.LABEL);
+
+/*        s.print(CgenConstants.WORD);
+        emitMethodRef(TreeConstants.Object_, TreeConstants.cool_abort);
+        s.println();
+
+        s.print(CgenConstants.WORD);
+        emitMethodRef(TreeConstants.Object_, TreeConstants.type_name);
+        s.println();
+
+        s.print(CgenConstants.WORD);
+        emitMethodRef(TreeConstants.Object_, TreeConstants.copy);
+        s.println();
+
+*/
+
+        for(int i = 0; i < env.getNumMethods();i++){
+            Symbol clsName = env.methodOffsets.lookup(i).classname;
+            Symbol mtdName = env.methodOffsets.lookup(i).methodname;
+            s.print(CgenConstants.WORD);
+            emitMethodRef(clsName, mtdName);
+            s.println();
+        }
+
+
+    }
+
 
     protected void codePrototypeObject(CgenEnv env) {
 
