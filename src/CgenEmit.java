@@ -304,7 +304,7 @@ public class CgenEmit  {
 
     /**
      * Emits an SW instruction.
-     *
+     *aff
      * @param dest_reg   the destination register
      * @param offset     the word offset from source register
      * @param source_reg the source register
@@ -692,6 +692,13 @@ public class CgenEmit  {
         emitAddiu(CgenConstants.SP, CgenConstants.SP, -4);
     }
 
+    protected void emitPop() {
+        emitAddiu(CgenConstants.SP, CgenConstants.SP, 4);
+    }
+
+    protected void emitTop(String reg) {
+        emitLoad(reg, 1, CgenConstants.SP);
+    }
     /**
      * Emits code to fetch the integer value of the Integer object.
      *
@@ -731,7 +738,7 @@ public class CgenEmit  {
     }
 
     /**
-     * Emits a reference to class' prototype object.
+     * Emits a reference to class' prototype    .
      *
      * @param sym the name of the class
      */
@@ -972,7 +979,6 @@ public class CgenEmit  {
         int reg_temps = CgenConstants.getRegisterTemps(temps);
         int stack_temps = CgenConstants.getStackTemps(temps);
         assert ( (reg_temps + stack_temps) == temps);
-
         emitAddiu(CgenConstants.SP, CgenConstants.SP,-(3 + temps) * CgenConstants.WORD_SIZE);   // allocate frame
         emitStore(CgenConstants.FP, 3 + temps, CgenConstants.SP);               // save caller's FP
         emitStore(CgenConstants.SELF, 2 + temps, CgenConstants.SP);             //  "    "       SELF
