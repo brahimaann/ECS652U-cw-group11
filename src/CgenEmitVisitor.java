@@ -1,12 +1,11 @@
 import ast.*;
-
 import java.util.List;
 
 public class CgenEmitVisitor extends CgenVisitor<String, String>{
 
     /* Emit code for expressions */
     CgenEnv env;
-
+    
     //  target: if there is any choice, put the result here, but
     //  there are no guarantees.
     //  Use forceDest instead if you really care.
@@ -59,7 +58,7 @@ public class CgenEmitVisitor extends CgenVisitor<String, String>{
 
     @Override
     public String visit(StaticDispatchNode node, String target) {
-        /* TODO */
+        
         return CgenConstants.ACC;
     }
 
@@ -172,7 +171,10 @@ public class CgenEmitVisitor extends CgenVisitor<String, String>{
 
     @Override
     public String visit(NewNode node, String target) {
-        /* TODO */
+
+
+
+
         return CgenConstants.ACC;
     }
 
@@ -191,42 +193,116 @@ public class CgenEmitVisitor extends CgenVisitor<String, String>{
 
     @Override
     public String visit(BlockNode node, String target) {
-        /* TODO */
-        return null;
+
+        List<ExpressionNode> exprs = node.getExprs();
+        String out = "";
+        for(int i = 0; i < exprs.size(); i++) {
+            out = exprs.get(i).accept(this,target);  //accept(exprs.get(i), target);  
+        }
+
+
+        return out;
     }
 
     @Override
     public String visit(PlusNode node, String data) {
-        /* TODO */
-        return null;
+
+
+    String valE1 = node.getE1().accept(this, data);
+    Cgen.emitter.emitPush(CgenConstants.ACC);
+    String valE2 = node.getE2().accept(this,data);
+
+     Cgen.emitter.emitTop(CgenConstants.T1);
+
+     Cgen.emitter.emitAdd(CgenConstants.ACC, CgenConstants.T1, CgenConstants.ACC);
+     Cgen.emitter.emitPop();
+     Cgen.emitter.emitStore();
+
+    return CgenConstants.ACC;
+
+
     }
 
     @Override
     public String visit(SubNode node, String data) {
-        /* TODO */
-        return null;
+
+
+        //Works if updated register is fixed but then memory error
+        
+    String valE1 = node.getE1().accept(this, CgenConstants.getRegister(-1));
+    String valE2 = node.getE2().accept(this,data);
+    Cgen.emitter.emitCopy();
+
+
+     Cgen.emitter.emitLoad(CgenConstants.T1,3 ,valE1);
+     Cgen.emitter.emitLoad(CgenConstants.T2 ,3 ,valE2);
+
+     Cgen.emitter.emitSub(CgenConstants.T1, CgenConstants.T1, CgenConstants.T2);
+     Cgen.emitter.emitStore(CgenConstants.T1, 3 , CgenConstants.ACC);
+
+     return CgenConstants.ACC;
     }
 
     @Override
     public String visit(MulNode node, String data) {
-        /* TODO */
-        return null;
+                
+
+             //Works if updated register is fixed but then memory error
+    String valE1 = node.getE1().accept(this, CgenConstants.getRegister(-1));
+    String valE2 = node.getE2().accept(this,data);
+    Cgen.emitter.emitCopy();
+
+
+     Cgen.emitter.emitLoad(CgenConstants.T1,3 ,valE1);
+     Cgen.emitter.emitLoad(CgenConstants.T2 ,3 ,valE2);
+
+     Cgen.emitter.emitMul(CgenConstants.T1, CgenConstants.T1, CgenConstants.T2);
+     Cgen.emitter.emitStore(CgenConstants.T1, 3 , CgenConstants.ACC);
+
+     return CgenConstants.ACC;
     }
 
     @Override
     public String visit(DivideNode node, String data) {
-        /* TODO */
-        return null;
+
+         //Works if updated register is fixed but then memory error
+        String valE1 = node.getE1().accept(this, CgenConstants.getRegister(-1));
+        String valE2 = node.getE2().accept(this,data);
+        Cgen.emitter.emitCopy();
+
+
+        Cgen.emitter.emitLoad(CgenConstants.T1,3 ,valE1);
+        Cgen.emitter.emitLoad(CgenConstants.T2 ,3 ,valE2);
+
+        Cgen.emitter.emitDiv(CgenConstants.T1, CgenConstants.T1, CgenConstants.T2);
+        Cgen.emitter.emitStore(CgenConstants.T1, 3 , CgenConstants.ACC);
+
+        return CgenConstants.ACC;
     }
 
     //The calling convention for equality_test:
     //  INPUT: The two objects are passed in $t1 and $t2
     //  OUTPUT: Initial value of $a0, if the objects are equal
     //          Initial value of $a1, otherwise
+
+
     @Override
     public String visit(EqNode node, String target) {
         /* TODO */
-        return CgenConstants.ACC;
+
+
+        // if() {  //Objects are equal
+
+       
+        //      return CgenConstants.ACC;
+
+        // } else {
+        //     return CgenConstants.A1;
+
+        // }
+
+        return null;
+        
     }
 
     @Override
@@ -279,6 +355,7 @@ public class CgenEmitVisitor extends CgenVisitor<String, String>{
 
     @Override
     public String visit(ObjectNode node, String target) {
+
         return env.vars.lookup(node.getName()).emitRef(target);
     }
 

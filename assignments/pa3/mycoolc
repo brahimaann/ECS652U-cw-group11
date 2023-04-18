@@ -1,0 +1,1 @@
+java -cp .:/home/don33baller/ECS652U-cw-distroSeman/ECS652U-cw-group11/lib/antlr-4.6-complete.jar: Runner $@
