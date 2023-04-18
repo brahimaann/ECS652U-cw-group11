@@ -89,7 +89,7 @@ public class CgenEmitVisitor extends CgenVisitor<String, String>{
                     // r_newvar is the value that we did the case on.  It will be bound to the new var.
                     String r_newvar = CgenConstants.ACC;
 
-                    lab = CgenEnv.getFreshLabel();
+                    lab = CgenEnv.getFreshLabel();  
                     CgenEnv downcast = Cgen.classTable.get(b.getType_decl()).env;
                     int class_tag = downcast.getClassTag();
                     int last_tag  = downcast.getMaxChildTag();
@@ -180,7 +180,37 @@ public class CgenEmitVisitor extends CgenVisitor<String, String>{
 
     @Override
     public String visit(CondNode node, String target) {
-        /* TODO */
+
+        int FalsePath= CgenEnv.getFreshLabel();
+
+        // int truePath= CgenEnv.getFreshLabel();
+
+
+
+        //We go to first condition, if its true we then jump to the then function
+        //Grab value of first thing
+
+        Cgen.emitter.emitLoad(CgenConstants.T1, 3 ,node.getCond().accept(this, null));
+
+        
+
+        //If it came back as NOT TRUE we then continue the true path
+        Cgen.emitter.emitBeqz(CgenConstants.T1, FalsePath);
+
+        node.getThenExpr().accept(this, CgenConstants.ACC);
+        Cgen.emitter.emitLoad(CgenConstants.T1, 9, CgenConstants.A1);
+
+
+
+        //If it comes back at FALSE then proceed with just running the else
+        Cgen.emitter.emitLabelDef(FalsePath);
+        node.getElseExpr().accept(this, CgenConstants.ACC);
+
+
+
+
+
+
         return CgenConstants.ACC;
     }
 
@@ -280,6 +310,8 @@ public class CgenEmitVisitor extends CgenVisitor<String, String>{
         Cgen.emitter.emitStore(CgenConstants.T1, 3, CgenConstants.ACC);
 
         Cgen.emitter.emitPop();
+
+        return CgenConstants.ACC;
     }
 
     @Override
@@ -304,6 +336,8 @@ public class CgenEmitVisitor extends CgenVisitor<String, String>{
         Cgen.emitter.emitStore(CgenConstants.T1, 3, CgenConstants.ACC);
 
         Cgen.emitter.emitPop();
+
+        return CgenConstants.ACC;
     }
 
     //The calling convention for equality_test:
@@ -317,28 +351,90 @@ public class CgenEmitVisitor extends CgenVisitor<String, String>{
         /* TODO */
 
 
-        if() {  //Objects are equal
+       int BranchEqual =  env.getFreshLabel();   
 
-       
-        return CgenConstants.ACC;
 
-        } else {
-             return CgenConstants.A1;
 
-         }
 
-        return null;
+
+       // System.out.println(node.getE1().accept(this, target).getType());
+
+        if(node.getE1().getType() == node.getE1().getType()) {
+
+            if(node.getE1().getType().getName().equals("String")) {
+                 System.out.println("String");
+
+            } else if(node.getE1().getType().getName().equals( "Bool") ) {
+                 System.out.println("Bool");
+
+            } else if(node.getE1().getType().getName().equals("Int")) {
+                System.out.println("Int");
+
+
+               Cgen.emitter.emitFetchInt(CgenConstants.T1, node.getE1().accept(this, CgenConstants.T1));
+               Cgen.emitter.emitFetchInt(CgenConstants.T2, node.getE2().accept(this, CgenConstants.T2));
+               Cgen.emitter.emitBeq(CgenConstants.T1, CgenConstants.T2, BranchEqual);   
+
+               //Now dealing with a value that is not equal
+               Cgen.emitter.emitLoadBool(CgenConstants.T2, false);
+               //Done here
+                
+
+
+
+
+               //Cgen.emitter.emitEqualityTest();
+
+
+
+                //Dealing with equal case
+               Cgen.emitter.emitLabelDef(BranchEqual);
+                Cgen.emitter.emitLoadBool(CgenConstants.T2, true);
+               return CgenConstants.T2;
+               
+
+               
+
+            }
+
+
+
+
+        }
+
+
+
+
+
+
+        // if((E1.getType() == E2.getType())) { 
+
+            
+
+        // //Objects are equal
+        // return CgenConstants.ACC;
+
+        // } else {
+        //     //Not equal
+        //      return CgenConstants.A1;
+
+
+        //  }
+
+         return null;
         
     }
 
     @Override
     public String visit(LEqNode node, String data) {
         /* TODO */
+        System.out.println("At LQNODE");
         return null;
     }
 
     @Override
     public String visit(LTNode node, String data) {
+        System.out.println("At LTNODE");
         /* TODO */
         return null;
     }
@@ -364,6 +460,8 @@ public class CgenEmitVisitor extends CgenVisitor<String, String>{
     @Override
     public String visit(BoolConstNode node, String target) {
         /* TODO */
+
+        System.out.println("Bool ConstNOde");
         return null;
     }
 
