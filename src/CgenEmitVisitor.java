@@ -211,12 +211,12 @@ public class CgenEmitVisitor extends CgenVisitor<String, String>{
     String valE1 = node.getE1().accept(this, data);
     Cgen.emitter.emitPush(CgenConstants.ACC);
     String valE2 = node.getE2().accept(this,data);
-
      Cgen.emitter.emitTop(CgenConstants.T1);
-
      Cgen.emitter.emitAdd(CgenConstants.ACC, CgenConstants.T1, CgenConstants.ACC);
      Cgen.emitter.emitPop();
-     Cgen.emitter.emitStore();
+    // Cgen.emitter.emitStore();
+
+    
 
     return CgenConstants.ACC;
 
