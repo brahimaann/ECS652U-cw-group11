@@ -207,16 +207,24 @@ public class CgenEmitVisitor extends CgenVisitor<String, String>{
     @Override
     public String visit(PlusNode node, String data) {
 
+        String E1 = node.getE1().accept(this, CgenConstants.ACC);
+        Cgen.emitter.emitPush(CgenConstants.ACC);
 
-    String valE1 = node.getE1().accept(this, data);
-    Cgen.emitter.emitPush(CgenConstants.ACC);
-    String valE2 = node.getE2().accept(this,data);
-     Cgen.emitter.emitTop(CgenConstants.T1);
-     Cgen.emitter.emitAdd(CgenConstants.ACC, CgenConstants.T1, CgenConstants.ACC);
-     Cgen.emitter.emitPop();
-    // Cgen.emitter.emitStore();
+
+        String E2 = node.getE2().accept(this, CgenConstants.ACC);
+        Cgen.emitter.emitCopy();
 
     
+        Cgen.emitter.emitFetchInt(CgenConstants.T1, CgenConstants.ACC);
+
+        Cgen.emitter.emitTop(CgenConstants.T3);
+        Cgen.emitter.emitFetchInt(CgenConstants.T2, CgenConstants.T3);
+
+        Cgen.emitter.emitAdd(CgenConstants.T1, CgenConstants.T1, CgenConstants.T2);
+
+        Cgen.emitter.emitStore(CgenConstants.T1, 3, CgenConstants.ACC);
+
+        Cgen.emitter.emitPop();
 
     return CgenConstants.ACC;
 
@@ -227,57 +235,75 @@ public class CgenEmitVisitor extends CgenVisitor<String, String>{
     public String visit(SubNode node, String data) {
 
 
-        //Works if updated register is fixed but then memory error
-        
-    String valE1 = node.getE1().accept(this, CgenConstants.getRegister(-1));
-    String valE2 = node.getE2().accept(this,data);
-    Cgen.emitter.emitCopy();
+
+        String E1 = node.getE1().accept(this, CgenConstants.ACC);
+        Cgen.emitter.emitPush(CgenConstants.ACC);
 
 
-     Cgen.emitter.emitLoad(CgenConstants.T1,3 ,valE1);
-     Cgen.emitter.emitLoad(CgenConstants.T2 ,3 ,valE2);
+        String E2 = node.getE2().accept(this, CgenConstants.ACC);
+        Cgen.emitter.emitCopy();
 
-     Cgen.emitter.emitSub(CgenConstants.T1, CgenConstants.T1, CgenConstants.T2);
-     Cgen.emitter.emitStore(CgenConstants.T1, 3 , CgenConstants.ACC);
+    
+        Cgen.emitter.emitFetchInt(CgenConstants.T1, CgenConstants.ACC);
+
+        Cgen.emitter.emitTop(CgenConstants.T3);
+        Cgen.emitter.emitFetchInt(CgenConstants.T2, CgenConstants.T3);
+
+        Cgen.emitter.emitSub(CgenConstants.T1, CgenConstants.T1, CgenConstants.T2);
+
+        Cgen.emitter.emitStore(CgenConstants.T1, 3, CgenConstants.ACC);
+
+        Cgen.emitter.emitPop();
+
 
      return CgenConstants.ACC;
     }
 
     @Override
     public String visit(MulNode node, String data) {
-                
 
-             //Works if updated register is fixed but then memory error
-    String valE1 = node.getE1().accept(this, CgenConstants.getRegister(-1));
-    String valE2 = node.getE2().accept(this,data);
-    Cgen.emitter.emitCopy();
+        String E1 = node.getE1().accept(this, CgenConstants.ACC);
+        Cgen.emitter.emitPush(CgenConstants.ACC);
 
 
-     Cgen.emitter.emitLoad(CgenConstants.T1,3 ,valE1);
-     Cgen.emitter.emitLoad(CgenConstants.T2 ,3 ,valE2);
+        String E2 = node.getE2().accept(this, CgenConstants.ACC);
+        Cgen.emitter.emitCopy();
 
-     Cgen.emitter.emitMul(CgenConstants.T1, CgenConstants.T1, CgenConstants.T2);
-     Cgen.emitter.emitStore(CgenConstants.T1, 3 , CgenConstants.ACC);
+    
+        Cgen.emitter.emitFetchInt(CgenConstants.T1, CgenConstants.ACC);
 
-     return CgenConstants.ACC;
+        Cgen.emitter.emitTop(CgenConstants.T3);
+        Cgen.emitter.emitFetchInt(CgenConstants.T2, CgenConstants.T3);
+
+        Cgen.emitter.emitMul(CgenConstants.T1, CgenConstants.T1, CgenConstants.T2);
+
+        Cgen.emitter.emitStore(CgenConstants.T1, 3, CgenConstants.ACC);
+
+        Cgen.emitter.emitPop();
     }
 
     @Override
     public String visit(DivideNode node, String data) {
 
-         //Works if updated register is fixed but then memory error
-        String valE1 = node.getE1().accept(this, CgenConstants.getRegister(-1));
-        String valE2 = node.getE2().accept(this,data);
+
+        String E1 = node.getE1().accept(this, CgenConstants.ACC);
+        Cgen.emitter.emitPush(CgenConstants.ACC);
+
+
+        String E2 = node.getE2().accept(this, CgenConstants.ACC);
         Cgen.emitter.emitCopy();
 
+    
+        Cgen.emitter.emitFetchInt(CgenConstants.T1, CgenConstants.ACC);
 
-        Cgen.emitter.emitLoad(CgenConstants.T1,3 ,valE1);
-        Cgen.emitter.emitLoad(CgenConstants.T2 ,3 ,valE2);
+        Cgen.emitter.emitTop(CgenConstants.T3);
+        Cgen.emitter.emitFetchInt(CgenConstants.T2, CgenConstants.T3);
 
         Cgen.emitter.emitDiv(CgenConstants.T1, CgenConstants.T1, CgenConstants.T2);
-        Cgen.emitter.emitStore(CgenConstants.T1, 3 , CgenConstants.ACC);
 
-        return CgenConstants.ACC;
+        Cgen.emitter.emitStore(CgenConstants.T1, 3, CgenConstants.ACC);
+
+        Cgen.emitter.emitPop();
     }
 
     //The calling convention for equality_test:
@@ -291,15 +317,15 @@ public class CgenEmitVisitor extends CgenVisitor<String, String>{
         /* TODO */
 
 
-        // if() {  //Objects are equal
+        if() {  //Objects are equal
 
        
-        //      return CgenConstants.ACC;
+        return CgenConstants.ACC;
 
-        // } else {
-        //     return CgenConstants.A1;
+        } else {
+             return CgenConstants.A1;
 
-        // }
+         }
 
         return null;
         
