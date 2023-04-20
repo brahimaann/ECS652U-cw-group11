@@ -58,8 +58,9 @@ public class CgenEmitVisitor extends CgenVisitor<String, String>{
 
     @Override
     public String visit(StaticDispatchNode node, String target) {
+        System.out.println("StaticDispatchNOde");
         
-        return CgenConstants.ACC;
+        return "HAPPPYYY";
     }
 
     // The cases are tested in the order
@@ -171,11 +172,11 @@ public class CgenEmitVisitor extends CgenVisitor<String, String>{
 
     @Override
     public String visit(NewNode node, String target) {
+        System.out.println("New NOde");
 
 
 
-
-        return CgenConstants.ACC;
+        return "HAPPY";
     }
 
     @Override
@@ -186,12 +187,13 @@ public class CgenEmitVisitor extends CgenVisitor<String, String>{
 
 
 
-              Cgen.emitter.emitLoadBool(CgenConstants.ACC, true);
+              //Cgen.emitter.emitLoadBool(CgenConstants.ACC, true);
 
-             var x = node.getCond().accept(this, CgenConstants.ACC);
+        var x = node.getCond().accept(this, CgenConstants.ACC);
 
 
-              Cgen.emitter.emitLoad(CgenConstants.T1, 3 , x);
+        //Load if true or not
+      //  Cgen.emitter.emitLoad(CgenConstants.T1, 3 , x);
 
 
         //If it came back as NOT TRUE we then continue the true path
@@ -204,7 +206,7 @@ public class CgenEmitVisitor extends CgenVisitor<String, String>{
 
     
          Cgen.emitter.emitLabelDef(FalsePath);
-        node.getElseExpr().accept(this, null);
+        node.getElseExpr().accept(this, CgenConstants.ACC   );
 
 
 
@@ -218,7 +220,41 @@ public class CgenEmitVisitor extends CgenVisitor<String, String>{
     @Override
     public String visit(LoopNode node, String target) {
         int loop_label = CgenEnv.getFreshLabel();
-        /* TODO */
+        int loop_label1 = CgenEnv.getFreshLabel();
+
+
+        Cgen.emitter.emitLabelDef(loop_label);
+
+
+
+        Cgen.emitter.emitLoadBool(CgenConstants.ACC, true);
+
+        var x = node.getCond().accept(this, CgenConstants.ACC);
+
+
+        Cgen.emitter.emitLoad(CgenConstants.T1, 3 , x);
+
+
+        //If it came back as NOT TRUE we break out of the loop
+        Cgen.emitter.emitBeqz(CgenConstants.T1, loop_label1);
+        node.getBody().accept(this, CgenConstants.ACC);
+        Cgen.emitter.emitBranch(loop_label);
+
+
+
+
+
+
+
+
+
+        Cgen.emitter.emitLabelDef(loop_label1);
+        //How to load void? NEED TO LOAD VOID INTO ACC
+       // Cgen.emitter.emitLoad();
+
+
+
+
         return CgenConstants.ACC;
     }
 
@@ -226,8 +262,9 @@ public class CgenEmitVisitor extends CgenVisitor<String, String>{
     public String visit(BlockNode node, String target) {
 
         List<ExpressionNode> exprs = node.getExprs();
-        String out = "";
+        String out = target;
         for(int i = 0; i < exprs.size(); i++) {
+                    System.out.println("Here");
             out = exprs.get(i).accept(this,target);  //accept(exprs.get(i), target);  
         }
 
@@ -354,16 +391,37 @@ public class CgenEmitVisitor extends CgenVisitor<String, String>{
 
        int BranchEqual =  env.getFreshLabel();   
 
-
-
         if(node.getE1().getType() == node.getE1().getType()) {
 
             if(node.getE1().getType().getName().equals("String")) {
-               Cgen.emitter.emitLoad(CgenConstants.T1, 3, node.getE1().accept(this, CgenConstants.T1));
-               Cgen.emitter.emitLoad(CgenConstants.T2, 3, node.getE2().accept(this, CgenConstants.T2));
 
 
+                
+            //    Cgen.emitter.emitLoad(CgenConstants.T1, 3, node.getE1().accept(this, CgenConstants.T1));
+            //    Cgen.emitter.emitPush(CgenConstants.T1);
+            //    Cgen.emitter.emitLoad(CgenConstants.T1, 3, node.getE2().accept(this, CgenConstants.T2));
 
+                String E1 = node.getE1().accept(this, CgenConstants.regNames[0]);
+                Cgen.emitter.emitPush(CgenConstants.regNames[0]);
+
+
+                String E2 = node.getE2().accept(this, CgenConstants.ACC);
+    
+
+                // Cgen.emitter.emitTop(CgenConstants.T1);
+                Cgen.emitter.emitTop(CgenConstants.regNames[0]);
+                Cgen.emitter.emitPop();
+
+                Cgen.emitter.emitMove(CgenConstants.T1, E1);
+                Cgen.emitter.emitMove(CgenConstants.T2, E2);
+                //Cgen.emitter.emitMove(CgenConstants.T1, CgenConstants.regNames[0]);
+
+               // Cgen.emitter.emitTop(CgenConstants.T3);
+                //Cgen.emitter.emitLoadAddress(CgenConstants.T2, CgenConstants.T3);
+
+
+                //T1 and T2 holding values
+               Cgen.emitter.emitLoadBool(CgenConstants.ACC, true);
                Cgen.emitter.emitBeq(CgenConstants.T1, CgenConstants.T2, BranchEqual);   
 
                //Now dealing with a value that is not equal
@@ -383,20 +441,32 @@ public class CgenEmitVisitor extends CgenVisitor<String, String>{
                Cgen.emitter.emitLabelDef(BranchEqual);
                 // BranchEqual =  env.getFreshLabel(); 
 
+            
+
 
                return CgenConstants.ACC;
                
+
+               
+
 
 
 
 
             } else if(node.getE1().getType().getName().equals( "Bool") ) {
 
+                // if(node.getE2().accept(this, null) == null) {
+                //     System.out.println("wowww");
+
+
+                //     return CgenConstants.ACC;
+                // }
+
                Cgen.emitter.emitLoad(CgenConstants.T1, 3, node.getE1().accept(this, CgenConstants.T1));
                Cgen.emitter.emitLoad(CgenConstants.T2, 3, node.getE2().accept(this, CgenConstants.T2));
 
 
-
+                Cgen.emitter.emitLoadBool(CgenConstants.ACC, true);
                Cgen.emitter.emitBeq(CgenConstants.T1, CgenConstants.T2, BranchEqual);   
 
                //Now dealing with a value that is not equal
@@ -408,12 +478,150 @@ public class CgenEmitVisitor extends CgenVisitor<String, String>{
                //Done here
 
 
+
+               Cgen.emitter.emitLabelDef(BranchEqual);
+                // BranchEqual =  env.getFreshLabel(); 
+
+               return CgenConstants.ACC;
+               
+
+               
+               
+
+            
+
+            } else if(node.getE1().getType().getName().equals("Int")) {
+
+
+               Cgen.emitter.emitFetchInt(CgenConstants.T1, node.getE1().accept(this, CgenConstants.T1));
+               Cgen.emitter.emitFetchInt(CgenConstants.T2, node.getE2().accept(this, CgenConstants.T2));
+                Cgen.emitter.emitLoadBool(CgenConstants.ACC, true);
+               Cgen.emitter.emitBeq(CgenConstants.T1, CgenConstants.T2, BranchEqual);   
+
+               //Now dealing with a value that is not equal
+               //Cgen.emitter.emitLoadBool(CgenConstants.T3, false);
+
+              Cgen.emitter.emitLoadBool(CgenConstants.ACC, false);
+               Cgen.emitter.emitBranch(BranchEqual);
+               //Cgen.emitter.emitEqualityTest();
+               //Done here
+
+
                 //Dealing with equal case
                 // Cgen.emitter.emitBranch(BranchEqual);
 
 
 
                Cgen.emitter.emitLabelDef(BranchEqual);
+                // BranchEqual =  env.getFreshLabel(); 
+
+
+                //  Cgen.emitter.emitLoad(CgenConstants.T1, 3 , CgenConstants.ACC);
+
+               return CgenConstants.ACC;
+               
+
+            }
+
+
+
+
+        }
+
+
+        //MUST DO SOME TYPE OF CHECKING FOR "UNIQUE OBJECTS" FOR NOW RETURN NULL
+         return "11111";
+        
+    }
+
+    @Override
+    public String visit(LEqNode node, String data) {
+
+       int BranchEqualLess =  env.getFreshLabel();   
+
+        if(node.getE1().getType() == node.getE1().getType()) {
+
+            if(node.getE1().getType().getName().equals("String")) {
+
+                
+            //    Cgen.emitter.emitLoad(CgenConstants.T1, 3, node.getE1().accept(this, CgenConstants.T1));
+            //    Cgen.emitter.emitPush(CgenConstants.T1);
+            //    Cgen.emitter.emitLoad(CgenConstants.T1, 3, node.getE2().accept(this, CgenConstants.T2));
+
+                String E1 = node.getE1().accept(this, CgenConstants.regNames[0]);
+                Cgen.emitter.emitPush(CgenConstants.regNames[0]);
+
+
+                String E2 = node.getE2().accept(this, CgenConstants.ACC);
+    
+
+                // Cgen.emitter.emitTop(CgenConstants.T1);
+                Cgen.emitter.emitTop(CgenConstants.regNames[0]);
+                Cgen.emitter.emitPop();
+
+                Cgen.emitter.emitMove(CgenConstants.T1, E1);
+                Cgen.emitter.emitMove(CgenConstants.T2, E2);
+                //Cgen.emitter.emitMove(CgenConstants.T1, CgenConstants.regNames[0]);
+
+               // Cgen.emitter.emitTop(CgenConstants.T3);
+                //Cgen.emitter.emitLoadAddress(CgenConstants.T2, CgenConstants.T3);
+
+
+                //T1 and T2 holding values
+               Cgen.emitter.emitLoadBool(CgenConstants.ACC, true);
+               Cgen.emitter.emitBleq(CgenConstants.T1, CgenConstants.T2, BranchEqualLess);   
+
+               //Now dealing with a value that is not equal
+               //Cgen.emitter.emitLoadBool(CgenConstants.T3, false);
+               Cgen.emitter.emitLoadBool(CgenConstants.ACC, false);
+
+               Cgen.emitter.emitBranch(BranchEqualLess);
+               //Cgen.emitter.emitEqualityTest();
+               //Done here
+
+
+                //Dealing with equal case
+                // Cgen.emitter.emitBranch(BranchEqual);
+
+
+
+               Cgen.emitter.emitLabelDef(BranchEqualLess);
+                // BranchEqual =  env.getFreshLabel(); 
+
+            
+
+
+               return CgenConstants.ACC;
+               
+
+               
+
+
+
+            } else if(node.getE1().getType().getName().equals( "Bool") ) {
+
+               Cgen.emitter.emitLoad(CgenConstants.T1, 3, node.getE1().accept(this, CgenConstants.T1));
+               Cgen.emitter.emitLoad(CgenConstants.T2, 3, node.getE2().accept(this, CgenConstants.T2));
+
+
+
+               Cgen.emitter.emitBleq(CgenConstants.T1, CgenConstants.T2, BranchEqualLess);   
+
+               //Now dealing with a value that is not equal
+               //Cgen.emitter.emitLoadBool(CgenConstants.T3, false);
+               Cgen.emitter.emitLoadBool(CgenConstants.ACC, false);
+
+               Cgen.emitter.emitBranch(BranchEqualLess);
+               //Cgen.emitter.emitEqualityTest();
+               //Done here
+
+
+                //Dealing with equal case
+                // Cgen.emitter.emitBranch(BranchEqual);
+
+
+
+               Cgen.emitter.emitLabelDef(BranchEqualLess);
                 // BranchEqual =  env.getFreshLabel(); 
 
 
@@ -432,13 +640,13 @@ public class CgenEmitVisitor extends CgenVisitor<String, String>{
 
                Cgen.emitter.emitFetchInt(CgenConstants.T1, node.getE1().accept(this, CgenConstants.T1));
                Cgen.emitter.emitFetchInt(CgenConstants.T2, node.getE2().accept(this, CgenConstants.T2));
-               Cgen.emitter.emitBeq(CgenConstants.T1, CgenConstants.T2, BranchEqual);   
+               Cgen.emitter.emitBleq(CgenConstants.T1, CgenConstants.T2, BranchEqualLess);   
 
                //Now dealing with a value that is not equal
                //Cgen.emitter.emitLoadBool(CgenConstants.T3, false);
                Cgen.emitter.emitLoadBool(CgenConstants.ACC, false);
 
-               Cgen.emitter.emitBranch(BranchEqual);
+               Cgen.emitter.emitBranch(BranchEqualLess);
                //Cgen.emitter.emitEqualityTest();
                //Done here
 
@@ -448,7 +656,7 @@ public class CgenEmitVisitor extends CgenVisitor<String, String>{
 
 
 
-               Cgen.emitter.emitLabelDef(BranchEqual);
+               Cgen.emitter.emitLabelDef(BranchEqualLess);
                 // BranchEqual =  env.getFreshLabel(); 
 
 
@@ -466,41 +674,181 @@ public class CgenEmitVisitor extends CgenVisitor<String, String>{
         }
 
 
-        //MUST DO SOME TYPE OF CHECKING FOR "UNIQUE OBJECTS"
-         return null;
-        
-    }
+        //MUST DO SOME TYPE OF CHECKING FOR "UNIQUE OBJECTS" FOR NOW RETURN NULL
+         return "22222";
 
-    @Override
-    public String visit(LEqNode node, String data) {
-        /* TODO */
-
-        
-        System.out.println("At LQNODE");
-        return null;
     }
 
     @Override
     public String visit(LTNode node, String data) {
         System.out.println("At LTNODE");
-        /* TODO */
-        return null;
+        
+        
+       int BranchEqualLess =  env.getFreshLabel();   
+
+        if(node.getE1().getType() == node.getE1().getType()) {
+
+            if(node.getE1().getType().getName().equals("String")) {
+
+                
+            //    Cgen.emitter.emitLoad(CgenConstants.T1, 3, node.getE1().accept(this, CgenConstants.T1));
+            //    Cgen.emitter.emitPush(CgenConstants.T1);
+            //    Cgen.emitter.emitLoad(CgenConstants.T1, 3, node.getE2().accept(this, CgenConstants.T2));
+
+                String E1 = node.getE1().accept(this, CgenConstants.regNames[0]);
+                Cgen.emitter.emitPush(CgenConstants.regNames[0]);
+
+
+                String E2 = node.getE2().accept(this, CgenConstants.ACC);
+    
+
+                // Cgen.emitter.emitTop(CgenConstants.T1);
+                Cgen.emitter.emitTop(CgenConstants.regNames[0]);
+                Cgen.emitter.emitPop();
+
+                Cgen.emitter.emitMove(CgenConstants.T1, E1);
+                Cgen.emitter.emitMove(CgenConstants.T2, E2);
+                //Cgen.emitter.emitMove(CgenConstants.T1, CgenConstants.regNames[0]);
+
+               // Cgen.emitter.emitTop(CgenConstants.T3);
+                //Cgen.emitter.emitLoadAddress(CgenConstants.T2, CgenConstants.T3);
+
+
+                //T1 and T2 holding values
+               Cgen.emitter.emitLoadBool(CgenConstants.ACC, true);
+               Cgen.emitter.emitBlt(CgenConstants.T1, CgenConstants.T2, BranchEqualLess);   
+
+               //Now dealing with a value that is not equal
+               //Cgen.emitter.emitLoadBool(CgenConstants.T3, false);
+               Cgen.emitter.emitLoadBool(CgenConstants.ACC, false);
+
+               Cgen.emitter.emitBranch(BranchEqualLess);
+               //Cgen.emitter.emitEqualityTest();
+               //Done here
+
+
+                //Dealing with equal case
+                // Cgen.emitter.emitBranch(BranchEqual);
+
+
+
+               Cgen.emitter.emitLabelDef(BranchEqualLess);
+                // BranchEqual =  env.getFreshLabel(); 
+
+            
+
+
+               return CgenConstants.ACC;
+               
+
+               
+
+
+
+
+            } else if(node.getE1().getType().getName().equals( "Bool") ) {
+
+               Cgen.emitter.emitLoad(CgenConstants.T1, 3, node.getE1().accept(this, CgenConstants.T1));
+               Cgen.emitter.emitLoad(CgenConstants.T2, 3, node.getE2().accept(this, CgenConstants.T2));
+
+
+
+               Cgen.emitter.emitBlt(CgenConstants.T1, CgenConstants.T2, BranchEqualLess);   
+
+               //Now dealing with a value that is not equal
+               //Cgen.emitter.emitLoadBool(CgenConstants.T3, false);
+               Cgen.emitter.emitLoadBool(CgenConstants.ACC, false);
+
+               Cgen.emitter.emitBranch(BranchEqualLess);
+               //Cgen.emitter.emitEqualityTest();
+               //Done here
+
+
+                //Dealing with equal case
+                // Cgen.emitter.emitBranch(BranchEqual);
+
+
+
+               Cgen.emitter.emitLabelDef(BranchEqualLess);
+                // BranchEqual =  env.getFreshLabel(); 
+
+
+
+
+
+               return CgenConstants.ACC;
+               
+
+               
+
+            
+
+            } else if(node.getE1().getType().getName().equals("Int")) {
+
+
+               Cgen.emitter.emitFetchInt(CgenConstants.T1, node.getE1().accept(this, CgenConstants.T1));
+               Cgen.emitter.emitFetchInt(CgenConstants.T2, node.getE2().accept(this, CgenConstants.T2));
+               Cgen.emitter.emitBlt(CgenConstants.T1, CgenConstants.T2, BranchEqualLess);   
+
+               //Now dealing with a value that is not equal
+               //Cgen.emitter.emitLoadBool(CgenConstants.T3, false);
+               Cgen.emitter.emitLoadBool(CgenConstants.ACC, false);
+
+               Cgen.emitter.emitBranch(BranchEqualLess);
+               //Cgen.emitter.emitEqualityTest();
+               //Done here
+
+
+                //Dealing with equal case
+                // Cgen.emitter.emitBranch(BranchEqual);
+
+
+
+               Cgen.emitter.emitLabelDef(BranchEqualLess);
+                // BranchEqual =  env.getFreshLabel(); 
+
+
+
+               return CgenConstants.ACC;
+               
+            }
+
+
+
+        }
+
+
+        //MUST DO SOME TYPE OF CHECKING FOR "UNIQUE OBJECTS" FOR NOW RETURN NULL
+         return "33333";
+
     }
 
     @Override
     public String visit(NegNode node, String target) {
-        /* TODO */
-        return null;
+        visit(node.getE1(), CgenConstants.ACC);
+        Cgen.emitter.emitCopy();
+
+        Cgen.emitter.emitFetchInt(CgenConstants.T1, CgenConstants.ACC);
+
+        Cgen.emitter.emitNeg(CgenConstants.T1, CgenConstants.T1);
+
+
+        Cgen.emitter.emitStore(CgenConstants.T1, 3, CgenConstants.ACC);
+
+
+        return CgenConstants.ACC;
     }
 
     @Override
     public String visit(CompNode node, String target) {
         /* TODO */
+        System.out.println("cOMPnoDE");
         return null;
     }
 
     @Override
     public String visit(IntConstNode node, String target) {
+             System.out.println("INtCOnstNOde");
         Cgen.emitter.emitLoadInt(target,node.getVal());
         return target;
     }
@@ -508,20 +856,43 @@ public class CgenEmitVisitor extends CgenVisitor<String, String>{
     @Override
     public String visit(BoolConstNode node, String target) {
         Cgen.emitter.emitLoadBool(target, node.getVal());
+        Cgen.emitter.emitLoad(CgenConstants.T1, 3, CgenConstants.ACC);
+
         return target;
     }
 
     @Override
     public String visit(StringConstNode node, String target) {
-        System.out.println("StringConstNode");
         Cgen.emitter.emitLoadString(target, node.getVal());
+        //System.out.println(node.getVal());
         return target;
     }
 
     @Override
     public String visit(IsVoidNode node, String target) {
-        /* TODO */
-        return null;
+        System.out.println("VOIDNODE");
+
+        int isVoid = env.getFreshLabel();
+        
+        var x = node.getE1().accept(this, CgenConstants.ACC);
+
+        Cgen.emitter.emitMove(CgenConstants.T1, CgenConstants.ACC);
+
+        //Cgen.emitter.emitLoadAddress(CgenConstants.T1, );
+
+        Cgen.emitter.emitLoadBool(CgenConstants.ACC  , true);
+
+       // Cgen.emitter.emitLoadAddress(CgenConstants.T1  , CgenConstants.ACC);
+
+        Cgen.emitter.emitBeqz( CgenConstants.T1, isVoid);
+        Cgen.emitter.emitLoadBool(CgenConstants.ACC  , false);
+        Cgen.emitter.emitLabelDef(isVoid);
+
+
+
+
+        
+        return CgenConstants.ACC;
     }
 
     @Override

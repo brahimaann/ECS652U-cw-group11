@@ -93,6 +93,7 @@ public class CgenEnv {
     // over the number of temps needed to calculate any attribute of the
     // class.
     public int getAttrTemps() {
+        
         return calcTemps.get();
     }
 
