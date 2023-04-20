@@ -1,11 +1,13 @@
-
 import ast.*;
 
-public class Cgen  {
+import java.io.PrintStream;
+
+public class Cgen {
 
     static CgenEmit emitter;
     /* inhertiance tree */
     static CgenClassTable classTable;
+
     /**
      * This method is the meat of the code generator.
      */
@@ -107,19 +109,30 @@ public class Cgen  {
         }
 
         public AttrInfo(int offset, AttributeNode node) {
+            System.out.println(node.getName());
+            System.out.println(offset);
             this.offset = offset;
             this.node = node;
         }
 
         @Override
         public String emitRef(String optionalDest) {
-            /* TODO */
-            return null;
+   
+
+            emitter.emitLoad(optionalDest, (offset + 3) ,  CgenConstants.SELF);
+
+             
+
+            return optionalDest;
+
         }
 
         @Override
         public void emitUpdate(String source) {
-            /* TODO */
+            
+              emitter.emitStore(source, offset + 3, CgenConstants.SELF);
+
+
         }
     }
 
@@ -133,12 +146,11 @@ public class Cgen  {
         @Override
         public String emitRef(String optionalDest) {
             String reg = CgenConstants.getRegister(offset);
-            if (reg != null)
-            {
-                if (Flags.cgen_debug) System.err.println("     Local read from register "+ reg );
+            if (reg != null) {
+                if (Flags.cgen_debug) System.err.println("     Local read from register " + reg);
                 return reg;
             } else {
-                if (Flags.cgen_debug) System.err.println("     Local load from FP offset "+ offset );
+                if (Flags.cgen_debug) System.err.println("     Local load from FP offset " + offset);
                 emitter.emitLoad(optionalDest, offset, CgenConstants.FP);
                 return optionalDest;
             }
@@ -147,13 +159,10 @@ public class Cgen  {
         @Override
         public void emitUpdate(String source) {
             String reg = CgenConstants.getRegister(offset);
-            if (reg != null)
-            {
+            if (reg != null) {
                 if (Flags.cgen_debug) System.err.println("     Local store to register" + reg);
                 emitter.emitMove(reg, source);
-            }
-            else
-            {
+            } else {
                 if (Flags.cgen_debug) System.err.println("     Local store to FP offset " + offset);
                 emitter.emitStore(source, offset, CgenConstants.FP);
             }
@@ -171,6 +180,7 @@ public class Cgen  {
             emitter.emitMove(optionalDest, CgenConstants.SELF);
             return optionalDest;
         }
+
         @Override
         public void emitUpdate(String source) {
             Utilities.fatalError("Cannot assign to self.");
@@ -184,8 +194,13 @@ public class Cgen  {
         public int getOffset() {
             return offset;
         }
+
         abstract public String emitRef(String optionalDest);
+
         abstract public void emitUpdate(String source);
-        public String getRegister() { return null; }
+
+        public String getRegister() {
+            return null;
+        }
     }
 }
