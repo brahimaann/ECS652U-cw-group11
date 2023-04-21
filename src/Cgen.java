@@ -1,3 +1,4 @@
+
 import ast.*;
 
 import java.io.PrintStream;
@@ -109,30 +110,29 @@ public class Cgen {
         }
 
         public AttrInfo(int offset, AttributeNode node) {
-            System.out.println(node.getName());
-            System.out.println(offset);
             this.offset = offset;
             this.node = node;
         }
 
         @Override
         public String emitRef(String optionalDest) {
-   
+            /* TODO */
 
-            emitter.emitLoad(optionalDest, (offset + 3) ,  CgenConstants.SELF);
 
-             
-
+                emitter.emitLoad(CgenConstants.ACC, 3, optionalDest);
             return optionalDest;
 
         }
 
         @Override
         public void emitUpdate(String source) {
-            
-              emitter.emitStore(source, offset + 3, CgenConstants.SELF);
+            /* TODO */
 
-
+            if (node.getType_decl().equals(TreeConstants.Int) || node.getType_decl().equals(TreeConstants.Bool) || node.getType_decl().equals(TreeConstants.Str)) {
+                emitter.emitStore(source,3, CgenConstants.SELF);
+            } else {
+                emitter.emitStore(CgenConstants.ACC, 4, CgenConstants.SELF);
+            }
         }
     }
 
